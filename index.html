@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="SkyCast — a fast, modern live weather dashboard with current conditions, hourly forecast and a 7-day outlook."
+    />
+    <meta name="theme-color" content="#1c3fae" />
+    <title>SkyCast — Live Weather</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='24' fill='%232B6CFF'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380..680&family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" id="brandMark"></div>
+          <div>
+            <h1>SkyCast</h1>
+            <span>Live weather forecast</span>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button
+            id="unitToggle"
+            class="ghost-btn"
+            type="button"
+            aria-label="Toggle temperature unit"
+          >
+            °C
+          </button>
+          <button
+            id="refreshBtn"
+            class="icon-btn"
+            type="button"
+            aria-label="Refresh weather"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="19"
+              height="19"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12a9 9 0 1 1-3-6.7" />
+              <path d="M21 3v6h-6" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- main section -->
+      <main>
+        <section class="search-section">
+          <form id="searchForm" class="search-bar" autocomplete="off">
+            <svg
+              class="search-icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              id="cityInput"
+              type="search"
+              placeholder="Search city..."
+              autocomplete="off"
+              aria-label="Search city"
+              aria-expanded="false"
+              aria-controls="suggestList"
+              role="combobox"
+            />
+            <button class="search-btn" type="submit">Search</button>
+            <ul
+              id="suggestList"
+              class="suggest-list hidden"
+              role="listbox"
+            ></ul>
+          </form>
+          <button id="locationBtn" class="location-btn" type="button">
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+            </svg>
+            <span>My location</span>
+          </button>
+        </section>
+
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+
+        <section id="skeleton" class="skeleton hidden" aria-hidden="true">
+          <div class="sk-hero"></div>
+          <div class="sk-row">
+            <div class="sk-chip"></div>
+            <div class="sk-chip"></div>
+            <div class="sk-chip"></div>
+            <div class="sk-chip"></div>
+            <div class="sk-chip"></div>
+            <div class="sk-chip"></div>
+          </div>
+          <div class="sk-block"></div>
+        </section>
+
+        <section id="weatherContent" class="weather-content hidden">
+          <div class="hero-card" id="heroCard">
+            <div class="sky" id="skyLayer" aria-hidden="true">
+              <div class="sky-orb" id="skyOrb"></div>
+              <div class="sky-cloud c1"></div>
+              <div class="sky-cloud c2"></div>
+              <div class="sky-cloud c3"></div>
+              <div class="sky-precip" id="skyPrecip"></div>
+              <div class="sky-stars" id="skyStars"></div>
+            </div>
+
+            <div class="hero-top">
+              <div class="hero-main">
+                <div>
+                  <p id="currentDate" class="eyebrow">Today</p>
+                  <h2 id="cityName">—</h2>
+                  <p id="countryName" class="muted">—</p>
+                </div>
+                <div
+                  id="weatherIcon"
+                  class="weather-icon"
+                  aria-hidden="true"
+                ></div>
+              </div>
+
+              <div class="temperature-row">
+                <span id="temperature">—</span
+                ><sup id="temperatureUnit">°C</sup>
+              </div>
+              <p id="condition" class="condition">—</p>
+              <p id="feelsLike" class="muted">Feels like —</p>
+
+              <div class="hero-stats">
+                <div class="stat">
+                  <span>Humidity</span>
+                  <strong id="humidity">—</strong>
+                </div>
+                <div class="stat">
+                  <span>Wind</span>
+                  <strong id="wind">—</strong>
+                </div>
+                <div class="stat">
+                  <span>Rain</span>
+                  <strong id="rain">—</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <section class="section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Next hours</p>
+                <h3>Hourly forecast</h3>
+              </div>
+            </div>
+            <svg
+              id="tempTrend"
+              class="temp-trend"
+              viewBox="0 0 660 64"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            ></svg>
+            <div id="hourlyForecast" class="hourly-list"></div>
+          </section>
+
+          <section class="section">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">This week</p>
+                <h3>7-day forecast</h3>
+              </div>
+            </div>
+            <div id="dailyForecast" class="daily-list"></div>
+          </section>
+
+          <section class="details-grid">
+            <div class="detail-card">
+              <span class="detail-icon" data-icon="sunrise"></span>
+              <div>
+                <span>Sunrise</span>
+                <strong id="sunrise">—</strong>
+              </div>
+            </div>
+            <div class="detail-card">
+              <span class="detail-icon" data-icon="sunset"></span>
+              <div>
+                <span>Sunset</span>
+                <strong id="sunset">—</strong>
+              </div>
+            </div>
+            <div class="detail-card">
+              <span class="detail-icon" data-icon="thermo"></span>
+              <div>
+                <span>High / Low</span>
+                <strong id="highLow">—</strong>
+              </div>
+            </div>
+            <div class="detail-card">
+              <span class="detail-icon" data-icon="uv"></span>
+              <div>
+                <span>UV index</span>
+                <strong id="uvIndex">—</strong>
+              </div>
+            </div>
+            <div class="detail-card">
+              <span class="detail-icon" data-icon="pressure"></span>
+              <div>
+                <span>Pressure</span>
+                <strong id="pressure">—</strong>
+              </div>
+            </div>
+            <div class="detail-card">
+              <span class="detail-icon" data-icon="clock"></span>
+              <div>
+                <span>Local time</span>
+                <strong id="localTime">—</strong>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section id="welcome" class="welcome-card">
+          <div class="welcome-icon" id="welcomeIcon"></div>
+          <h2>Check the weather anywhere</h2>
+          <p>
+            Search for a city or use your location to get live conditions, an
+            hourly outlook, and a 7-day forecast.
+          </p>
+          <div class="quick-cities">
+            <button type="button" data-city="Lahore">Lahore</button>
+            <button type="button" data-city="Islamabad">Islamabad</button>
+            <button type="button" data-city="Karachi">Karachi</button>
+            <button type="button" data-city="London">London</button>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span>SkyCast</span>
+        <span>•</span>
+        <span>By Muhammad Ahsan</span>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
